@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.ImageButton
@@ -22,6 +23,31 @@ class MainActivity : AppCompatActivity() {
 
     private val items = mutableListOf<ShoppingItem>()
     private var checkedExpanded = false
+
+    private val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0
+    ) {
+        override fun onMove(
+            recyclerView: RecyclerView,
+            viewHolder: RecyclerView.ViewHolder,
+            target: RecyclerView.ViewHolder,
+        ): Boolean {
+            val from = viewHolder.bindingAdapterPosition
+            val to = target.bindingAdapterPosition
+            if (!listAdapter.canReorder(from, to)) return false
+            listAdapter.moveItem(from, to)
+            return true
+        }
+
+        override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+
+        override fun isLongPressDragEnabled() = false
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            persistReorder()
+        }
+    })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,10 +84,12 @@ class MainActivity : AppCompatActivity() {
                 checkedExpanded = !checkedExpanded
                 refreshList()
             },
+            onStartDrag = { holder -> itemTouchHelper.startDrag(holder) },
         )
         val recycler = findViewById<RecyclerView>(R.id.recyclerView)
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = listAdapter
+        itemTouchHelper.attachToRecyclerView(recycler)
 
         input = findViewById(R.id.inputItem)
         suggestionsAdapter = ArrayAdapter(
@@ -127,6 +155,15 @@ class MainActivity : AppCompatActivity() {
         items.removeAll { it.name == item.name }
         repository.saveItems(items)
         refreshList()
+    }
+
+    private fun persistReorder() {
+        val newUnchecked = listAdapter.currentUncheckedItems()
+        val checked = items.filter { it.checked }
+        items.clear()
+        items.addAll(newUnchecked)
+        items.addAll(checked)
+        repository.saveItems(items)
     }
 
     private fun clearChecked() {

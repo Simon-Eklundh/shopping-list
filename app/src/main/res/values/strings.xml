@@ -3,6 +3,7 @@
     <string name="add_item_hint">List item</string>
     <string name="add">Add</string>
     <string name="delete_item">Delete item</string>
+    <string name="drag_handle">Drag to reorder</string>
     <string name="clear_checked">Clear checked items</string>
     <string name="duplicate_item">“%1$s” is already on the list</string>
     <plurals name="checked_items">

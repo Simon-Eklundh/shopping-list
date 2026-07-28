@@ -2,15 +2,16 @@ package com.example.shoppinglist
 
 import android.graphics.Paint
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.checkbox.MaterialCheckBox
+import java.util.Collections
 
 sealed interface Row {
     data class Item(val item: ShoppingItem) : Row
@@ -21,9 +22,41 @@ class ShoppingListAdapter(
     private val onToggle: (ShoppingItem, Boolean) -> Unit,
     private val onDelete: (ShoppingItem) -> Unit,
     private val onHeaderClick: () -> Unit,
-) : ListAdapter<Row, RecyclerView.ViewHolder>(Diff) {
+    private val onStartDrag: (RecyclerView.ViewHolder) -> Unit,
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    override fun getItemViewType(position: Int) = when (getItem(position)) {
+    private var rows: MutableList<Row> = mutableListOf()
+
+    fun submitList(newRows: List<Row>) {
+        val diff = DiffUtil.calculateDiff(RowDiff(rows, newRows))
+        rows = newRows.toMutableList()
+        diff.dispatchUpdatesTo(this)
+    }
+
+    /** Unchecked items in their current on-screen order, reflecting any in-progress drag. */
+    fun currentUncheckedItems(): List<ShoppingItem> =
+        rows.filterIsInstance<Row.Item>().map { it.item }.filter { !it.checked }
+
+    /** Only adjacent unchecked items may be reordered; the header and checked items are fixed. */
+    fun canReorder(from: Int, to: Int): Boolean {
+        if (from !in rows.indices || to !in rows.indices) return false
+        val fromRow = rows[from]
+        val toRow = rows[to]
+        return fromRow is Row.Item && !fromRow.item.checked && toRow is Row.Item && !toRow.item.checked
+    }
+
+    fun moveItem(from: Int, to: Int) {
+        if (from < to) {
+            for (i in from until to) Collections.swap(rows, i, i + 1)
+        } else {
+            for (i in from downTo to + 1) Collections.swap(rows, i, i - 1)
+        }
+        notifyItemMoved(from, to)
+    }
+
+    override fun getItemCount() = rows.size
+
+    override fun getItemViewType(position: Int) = when (rows[position]) {
         is Row.Item -> R.layout.item_shopping
         is Row.CheckedHeader -> R.layout.item_checked_header
     }
@@ -37,7 +70,7 @@ class ShoppingListAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (val row = getItem(position)) {
+        when (val row = rows[position]) {
             is Row.Item -> (holder as ItemViewHolder).bind(row.item)
             is Row.CheckedHeader -> (holder as HeaderViewHolder).bind(row)
         }
@@ -46,6 +79,7 @@ class ShoppingListAdapter(
     inner class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val checkBox: MaterialCheckBox = itemView.findViewById(R.id.itemCheckBox)
         private val deleteButton: ImageButton = itemView.findViewById(R.id.deleteButton)
+        private val dragHandle: ImageView = itemView.findViewById(R.id.dragHandle)
 
         fun bind(item: ShoppingItem) {
             checkBox.setOnCheckedChangeListener(null)
@@ -59,6 +93,14 @@ class ShoppingListAdapter(
             }
             checkBox.setOnCheckedChangeListener { _, isChecked -> onToggle(item, isChecked) }
             deleteButton.setOnClickListener { onDelete(item) }
+
+            dragHandle.visibility = if (item.checked) View.INVISIBLE else View.VISIBLE
+            dragHandle.setOnTouchListener { _, event ->
+                if (event.actionMasked == MotionEvent.ACTION_DOWN && !item.checked) {
+                    onStartDrag(this)
+                }
+                false
+            }
         }
     }
 
@@ -76,15 +118,23 @@ class ShoppingListAdapter(
         }
     }
 
-    private object Diff : DiffUtil.ItemCallback<Row>() {
-        override fun areItemsTheSame(oldItem: Row, newItem: Row) = when {
-            oldItem is Row.CheckedHeader && newItem is Row.CheckedHeader -> true
-            oldItem is Row.Item && newItem is Row.Item ->
-                // Names are unique (duplicates are blocked), so the name is a stable identity.
-                oldItem.item.name.equals(newItem.item.name, ignoreCase = true)
-            else -> false
+    private class RowDiff(private val old: List<Row>, private val new: List<Row>) : DiffUtil.Callback() {
+        override fun getOldListSize() = old.size
+        override fun getNewListSize() = new.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            val oldItem = old[oldItemPosition]
+            val newItem = new[newItemPosition]
+            return when {
+                oldItem is Row.CheckedHeader && newItem is Row.CheckedHeader -> true
+                oldItem is Row.Item && newItem is Row.Item ->
+                    // Names are unique (duplicates are blocked), so the name is a stable identity.
+                    oldItem.item.name.equals(newItem.item.name, ignoreCase = true)
+                else -> false
+            }
         }
 
-        override fun areContentsTheSame(oldItem: Row, newItem: Row) = oldItem == newItem
+        override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
+            old[oldItemPosition] == new[newItemPosition]
     }
 }
