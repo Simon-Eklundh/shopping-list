@@ -6,8 +6,22 @@
     <string name="drag_handle">Drag to reorder</string>
     <string name="clear_checked">Clear checked items</string>
     <string name="duplicate_item">“%1$s” is already on the list</string>
+    <string name="back">Back</string>
+    <string name="new_list">New list</string>
+    <string name="list_name_hint">List name</string>
+    <string name="list_name_required">Enter a name</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_list">Delete list</string>
+    <string name="delete_list_confirm">This list and all its items will be deleted.</string>
+    <string name="no_lists_yet">Tap + to create your first shopping list</string>
+    <string name="list_empty">Empty</string>
     <plurals name="checked_items">
         <item quantity="one">%d checked item</item>
         <item quantity="other">%d checked items</item>
+    </plurals>
+    <plurals name="list_item_count">
+        <item quantity="one">%d item left</item>
+        <item quantity="other">%d items left</item>
     </plurals>
 </resources>
