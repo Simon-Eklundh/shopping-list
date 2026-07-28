@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.simon-eklundh.shoppinglist"
+    namespace = "com.simoneklundh.shoppinglist"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.simon-eklundh.shoppinglist"
+        applicationId = "com.simoneklundh.shoppinglist"
         minSdk = 36
         //noinspection OldTargetApi
         targetSdk = 36
