@@ -33,7 +33,6 @@ class MainActivity : AppCompatActivity() {
         homeAdapter = HomeAdapter(
             onClick = { list -> openList(list) },
             onLongClick = { list -> confirmDeleteList(list) },
-            remainingItemCount = { list -> repository.loadItems(list.id).count { !it.checked } },
         )
         val recycler = findViewById<RecyclerView>(R.id.listsRecyclerView)
         recycler.layoutManager = GridLayoutManager(this, 2)
@@ -51,7 +50,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun refreshLists() {
         val lists = repository.loadLists().sortedByDescending { it.createdAt }
-        homeAdapter.submitList(lists)
+        val rows = lists.map { list ->
+            HomeListItem(list, repository.loadItems(list.id).count { !it.checked })
+        }
+        homeAdapter.submitList(rows)
         findViewById<View>(R.id.emptyState).visibility =
             if (lists.isEmpty()) View.VISIBLE else View.GONE
     }

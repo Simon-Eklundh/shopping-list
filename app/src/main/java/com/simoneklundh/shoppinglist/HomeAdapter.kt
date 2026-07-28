@@ -7,21 +7,22 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 
+data class HomeListItem(val meta: ShoppingListMeta, val remainingCount: Int)
+
 class HomeAdapter(
     private val onClick: (ShoppingListMeta) -> Unit,
     private val onLongClick: (ShoppingListMeta) -> Unit,
-    private val remainingItemCount: (ShoppingListMeta) -> Int,
 ) : RecyclerView.Adapter<HomeAdapter.ListViewHolder>() {
 
-    private var lists: MutableList<ShoppingListMeta> = mutableListOf()
+    private var rows: MutableList<HomeListItem> = mutableListOf()
 
-    fun submitList(newLists: List<ShoppingListMeta>) {
-        val diff = DiffUtil.calculateDiff(ListDiff(lists, newLists))
-        lists = newLists.toMutableList()
+    fun submitList(newRows: List<HomeListItem>) {
+        val diff = DiffUtil.calculateDiff(ListDiff(rows, newRows))
+        rows = newRows.toMutableList()
         diff.dispatchUpdatesTo(this)
     }
 
-    override fun getItemCount() = lists.size
+    override fun getItemCount() = rows.size
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_list_card, parent, false)
@@ -29,38 +30,39 @@ class HomeAdapter(
     }
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        holder.bind(lists[position])
+        holder.bind(rows[position])
     }
 
     inner class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val nameText: TextView = itemView.findViewById(R.id.listName)
         private val countText: TextView = itemView.findViewById(R.id.listItemCount)
 
-        fun bind(list: ShoppingListMeta) {
-            nameText.text = list.name
-            val count = remainingItemCount(list)
-            countText.text = if (count == 0) {
+        fun bind(row: HomeListItem) {
+            nameText.text = row.meta.name
+            countText.text = if (row.remainingCount == 0) {
                 itemView.resources.getString(R.string.list_empty)
             } else {
-                itemView.resources.getQuantityString(R.plurals.list_item_count, count, count)
+                itemView.resources.getQuantityString(
+                    R.plurals.list_item_count, row.remainingCount, row.remainingCount
+                )
             }
-            itemView.setOnClickListener { onClick(list) }
+            itemView.setOnClickListener { onClick(row.meta) }
             itemView.setOnLongClickListener {
-                onLongClick(list)
+                onLongClick(row.meta)
                 true
             }
         }
     }
 
     private class ListDiff(
-        private val old: List<ShoppingListMeta>,
-        private val new: List<ShoppingListMeta>,
+        private val old: List<HomeListItem>,
+        private val new: List<HomeListItem>,
     ) : DiffUtil.Callback() {
         override fun getOldListSize() = old.size
         override fun getNewListSize() = new.size
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int) =
-            old[oldItemPosition].id == new[newItemPosition].id
+            old[oldItemPosition].meta.id == new[newItemPosition].meta.id
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int) =
             old[oldItemPosition] == new[newItemPosition]
