@@ -15,10 +15,22 @@ android {
         minSdk = 36
         //noinspection OldTargetApi
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.4"
+        versionCode = 2
+        versionName = "1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        // Committed so debug builds share one stable signing certificate across machines and
+        // CI runs. Without it, each environment auto-generates its own debug.keystore, and
+        // Android refuses to install a build as an "update" over one signed by a different key.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {

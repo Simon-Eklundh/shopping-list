@@ -36,8 +36,11 @@ jobs:
       - name: Read version name
         run: echo "VERSION_NAME=$(sed -n 's/.*versionName = "\(.*\)"/\1/p' app/build.gradle.kts)" >> "$GITHUB_ENV"
 
+      - name: Rename APK
+        run: mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/shopping-list-${{ env.VERSION_NAME }}.apk
+
       - name: Upload APK
         uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
           name: shopping-list-${{ env.VERSION_NAME }}
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/shopping-list-${{ env.VERSION_NAME }}.apk
