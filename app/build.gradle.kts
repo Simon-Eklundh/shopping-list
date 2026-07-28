@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.shoppinglist"
+    namespace = "com.simon-eklundh.shoppinglist"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -11,11 +11,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.shoppinglist"
+        applicationId = "com.simon-eklundh.shoppinglist"
         minSdk = 36
+        //noinspection OldTargetApi
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
