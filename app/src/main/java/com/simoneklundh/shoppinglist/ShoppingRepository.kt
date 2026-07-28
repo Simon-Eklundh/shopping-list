@@ -1,4 +1,4 @@
-package com.example.shoppinglist
+package com.simoneklundh.shoppinglist
 
 import android.content.Context
 import org.json.JSONArray

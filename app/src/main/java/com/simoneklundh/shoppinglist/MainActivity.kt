@@ -1,4 +1,4 @@
-package com.example.shoppinglist
+package com.simoneklundh.shoppinglist
 
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo

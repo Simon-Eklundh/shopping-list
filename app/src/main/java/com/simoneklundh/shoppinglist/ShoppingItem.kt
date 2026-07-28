@@ -1,4 +1,4 @@
-package com.example.shoppinglist
+package com.simoneklundh.shoppinglist
 
 data class ShoppingItem(
     val name: String,
