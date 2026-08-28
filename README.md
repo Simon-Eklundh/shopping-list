@@ -7,6 +7,9 @@ A minimal Google Keep–style shopping list app for Android.
 - Checked ("bought") items collapse into a hidden **N checked items** section, like Keep
 - Everything is stored locally on the device (SharedPreferences) — no network, no account
 
+<img src="https://github.com/user-attachments/assets/95d65e94-4d72-46b4-8ee2-6e6a5bfda764" width="250" alt="Shopping list screen" />
+<img src="https://github.com/user-attachments/assets/50ffcb0f-3564-4416-bad6-3b6991ef95ed" width="250" alt="Item detail screen" />
+
 Requires **Android 16 (API 36)** or newer.
 
 ## Building the APK
