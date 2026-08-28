@@ -3,8 +3,7 @@
 A minimal Google Keep–style shopping list app for Android.
 
 - Add items with autocomplete suggestions based on everything you've added before
-- No duplicates: adding an item that's already on the list shows a notice instead
-- Re-adding an item that's been checked off un-checks it again
+- No duplicates: Re-adding an item that's been checked off un-checks it again
 - Checked ("bought") items collapse into a hidden **N checked items** section, like Keep
 - Everything is stored locally on the device (SharedPreferences) — no network, no account
 
